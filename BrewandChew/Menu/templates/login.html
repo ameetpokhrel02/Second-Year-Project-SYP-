@@ -1,0 +1,61 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Brew and Chew</title>
+    <link rel="stylesheet" href="{% static 'css/loginn.css'  %}"/>
+</head>
+<body>
+    <div class="container">
+        <!-- Left Section (Login Form) -->
+        <div class="form-box">
+            <h2>Brew and Chew</h2>
+            <p class="welcome">Welcome Back!</p>
+            
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-error{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            <!-- Login Form -->
+            <form method="post" class="login-form">
+                {% csrf_token %}
+                {% if form.errors %}
+                    <div class="error-message">
+                        Invalid username or password. Please try again.
+                    </div>
+                {% endif %}
+                <div class="form-group">
+                    <label for="id_username">Username</label>
+                    {{ form.username }}
+                </div>
+                <div class="form-group">
+                    <label for="id_password">Password</label>
+                    {{ form.password }}
+                </div>
+                <button type="submit" class="login-btn">Login</button>
+                
+                <div class="form-footer">
+                    <p>Don't have an account? <a href="{% url 'register' %}" class="register-link">Register here</a></p>
+                </div>
+            </form>
+        </div>
+
+        <!-- Right Section (Image & CTA) -->
+        <div class="right-box">
+            <div class="overlay">
+                <h2>Craving Something?</h2>
+                <p>Let's get your favorites</p>
+                <a href="{% url 'register' %}" class="cta-btn">Get Started</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'js/login.js' %}"></script>
+</body>
+</html>

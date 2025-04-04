@@ -1,0 +1,67 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/loginn.css'  %}"/>
+    <title>Register - Brew and Chew</title>
+</head>
+<body>
+    <div class="container">
+        <!-- Left Section (Register Form) -->
+        <div class="form-box">
+            <h2>Brew and Chew</h2>
+            <p class="welcome">Create Your Account</p>
+            
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-error{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            <!-- Register Form -->
+            <form method="post" class="register-form">
+                {% csrf_token %}
+                {% if form.errors %}
+                    <div class="error-message">
+                        Please correct the errors below.
+                    </div>
+                {% endif %}
+                <div class="form-group">
+                    <label for="id_username">Username</label>
+                    {{ form.username }}
+                </div>
+                <div class="form-group">
+                    <label for="id_email">Email</label>
+                    {{ form.email }}
+                </div>
+                <div class="form-group">
+                    <label for="id_password1">Password</label>
+                    {{ form.password1 }}
+                </div>
+                <div class="form-group">
+                    <label for="id_password2">Confirm Password</label>
+                    {{ form.password2 }}
+                </div>
+                <button type="submit" class="register-btn">Register</button>
+                
+                <div class="form-footer">
+                    <p>Already have an account? <a href="{% url 'login' %}" class="login-link">Login here</a></p>
+                </div>
+            </form>
+        </div>
+
+        <!-- Right Section (Image & CTA) -->
+        <div class="right-box">
+            <div class="overlay">
+                <h2>Join Our Foodie Community</h2>
+                <p>Create an account to start ordering delicious food!</p>
+                <a href="{% url 'login' %}" class="cta-btn">Already have an account?</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

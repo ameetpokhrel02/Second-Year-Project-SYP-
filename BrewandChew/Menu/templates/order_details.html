@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3>Order #{{ order.id }}</h3>
+            <span class="badge badge-{{ order.status|lower }}">{{ order.get_status_display }}</span>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Order Information</h5>
+                    <p><strong>Date:</strong> {{ order.created_at|date:"F j, Y, g:i a" }}</p>
+                    <p><strong>Last Updated:</strong> {{ order.updated_at|date:"F j, Y, g:i a" }}</p>
+                    <p><strong>Status:</strong> {{ order.get_status_display }}</p>
+                    <p><strong>Total Amount:</strong> ${{ order.total_amount }}</p>
+                </div>
+                <div class="col-md-6">
+                    <h5>Customer Information</h5>
+                    <p><strong>Name:</strong> {{ order.user.get_full_name|default:order.user.username }}</p>
+                    <p><strong>Email:</strong> {{ order.user.email }}</p>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <h5>Order Items</h5>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in order.items.all %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" 
+                                             style="width: 50px; height: 50px; object-fit: cover; margin-right: 10px;">
+                                        {{ item.product.name }}
+                                    </div>
+                                </td>
+                                <td>${{ item.price }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>${{ item.total_price }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3" class="text-right"><strong>Total Amount:</strong></td>
+                                <td><strong>${{ order.total_amount }}</strong></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            {% if user.is_staff %}
+            <div class="mt-4">
+                <h5>Update Order Status</h5>
+                <form id="updateStatusForm" class="form-inline">
+                    {% csrf_token %}
+                    <select class="form-control mr-2" name="status">
+                        {% for status_value, status_label in order.STATUS_CHOICES %}
+                        <option value="{{ status_value }}" {% if order.status == status_value %}selected{% endif %}>
+                            {{ status_label }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn btn-primary">Update Status</button>
+                </form>
+            </div>
+            {% endif %}
+
+            {% if order.can_cancel %}
+            <div class="mt-4">
+                <button class="btn btn-danger cancel-order" data-order-id="{{ order.id }}">Cancel Order</button>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Handle status update for staff
+    $('#updateStatusForm').submit(function(e) {
+        e.preventDefault();
+        $.ajax({
+            url: '/update-order-status/{{ order.id }}/',
+            type: 'POST',
+            data: $(this).serialize(),
+            success: function(response) {
+                location.reload();
+            },
+            error: function(xhr) {
+                alert(xhr.responseJSON.error || 'Error updating order status');
+            }
+        });
+    });
+
+    // Handle order cancellation
+    $('.cancel-order').click(function() {
+        if (confirm('Are you sure you want to cancel this order?')) {
+            $.ajax({
+                url: '/cancel-order/{{ order.id }}/',
+                type: 'POST',
+                data: {
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    location.reload();
+                },
+                error: function(xhr) {
+                    alert(xhr.responseJSON.error || 'Error cancelling order');
+                }
+            });
+        }
+    });
+});
+</script>
+{% endblock %} 
