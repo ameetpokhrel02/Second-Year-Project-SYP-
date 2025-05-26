@@ -13,7 +13,7 @@ class MenuItem(models.Model):
 
 
 
-    # Product model for the menu items
+# Product model for the menu items
 class Product(models.Model):
     CATEGORY_CHOICES = [
         ('non_veg', 'Non-Vegetarian'),
